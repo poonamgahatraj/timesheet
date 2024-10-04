@@ -1,10 +1,19 @@
 import React, { useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useUserContext } from '../context/usercontext';
 
 export default function Worker() {
+    const { users } = useUserContext();
+    const location = useLocation(); // Get location object
+    const { state } = location; // Access state passed from login
+    const loggedInUserEmail = state?.email ? state.email : ''; // Get username from state
+
+    const loggedInUser = users.find(user => user.email === loggedInUserEmail);
+
     const [selectedYear, setSelectedYear] = useState('');
     const [selectedMonth, setSelectedMonth] = useState('');
     const [timesheet, setTimesheet] = useState({});
-  
+
     // Generate an array of years (e.g., 2020 to 2030)
     const years = Array.from({ length: 11 }, (_, i) => 2020 + i);
     
@@ -40,8 +49,19 @@ export default function Worker() {
   
     // Handle submit button to log or post the timesheet data
     const handleSubmit = () => {
-      console.log("Timesheet Data:", timesheet);
-      // Here you can also make a POST request to submit the timesheet to a backend server
+      const payload = {
+        email: loggedInUserEmail, // Worker’s email
+        year: selectedYear, // Selected year
+        month: selectedMonth, // Selected month
+        timesheet: timesheet // Data for each day
+      };
+    
+      // Save the payload to local storage
+      const savedTimesheets = JSON.parse(localStorage.getItem('timesheets')) || [];
+      savedTimesheets.push(payload);
+      localStorage.setItem('timesheets', JSON.stringify(savedTimesheets));
+    
+      console.log("Timesheet saved locally:", payload);
     };
 
     return (
@@ -49,7 +69,7 @@ export default function Worker() {
         <div style={{ padding: "2%" }}>
           <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "10px" }}>
             <img src='./profileicon.jpg' style={{ height: "25px", width: "25px", border: "1px solid black", borderRadius: "50%" }} alt="profile" />
-            <p>Username</p>
+            <p>{loggedInUser ? loggedInUser.name : 'Guest'}</p> 
           </div>
 
           <div style={{ display: "flex", gap: "20px", marginTop: '20px' }}>
@@ -121,7 +141,7 @@ export default function Worker() {
           )}
 
           {/* Submit Button */}
-          <button  onClick={handleSubmit}  style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: 'blue', color: 'white', border: 'none', borderRadius: '5px'   }}>
+          <button onClick={handleSubmit} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: 'blue', color: 'white', border: 'none', borderRadius: '5px' }}>
             Submit 
           </button>
         </div>

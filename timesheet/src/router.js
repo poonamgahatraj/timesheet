@@ -4,22 +4,19 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
 import Worker from './pages/Worker';
+import { UserProvider } from './context/usercontext';
 
 export default function AppRouter() {
   return (
-    <Router>
-      <Routes>
-      
-        <Route path="/" element={<Login />} />
-
-       
-        <Route path="/admin" element={<Admin />} />
-
-      
-        <Route path="/worker" element={<Worker />} />
-
-    
-      </Routes>
-    </Router>
+    // Wrap the entire Router with UserProvider
+    <UserProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/worker" element={<Worker />} />
+        </Routes>
+      </Router>
+    </UserProvider>
   );
 }

@@ -1,46 +1,49 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useUserContext } from '../context/usercontext';
 
 export default function Admin() {
-  // Sample data of members
   const { users } = useUserContext();
-
+  
+  const admin = users.find(user => user.role === 'admin'); // Assuming admin is the one with role 'admin'
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMember, setSelectedMember] = useState(null);
   const [timesheets, setTimesheets] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Default to current month
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Default to current year
 
-  // Array to map month numbers to month names
+  const navigate = useNavigate(); // Initialize navigate
+
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
 
-  // Fetch timesheets from local storage when the component mounts
   useEffect(() => {
     const savedTimesheets = JSON.parse(localStorage.getItem('timesheets')) || [];
     setTimesheets(savedTimesheets);
   }, []);
 
-  // Filter users by the search term
   const filteredMembers = users.filter(member =>
     member.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Handle member selection
   const handleSelectMember = (member) => {
-    setSearchTerm(member.name); // Set the clicked member's name as the search term
-    setSelectedMember(member); // Update the selected member's details
+    setSearchTerm(member.name);
+    setSelectedMember(member);
   };
 
-  // Find the timesheet entries for the selected member
   const selectedMemberTimesheets = selectedMember
-    ? timesheets.filter(sheet => sheet.email === selectedMember.email)
+    ? timesheets.filter(sheet => 
+        sheet.email === selectedMember.email &&
+        sheet.month === selectedMonth &&
+        sheet.year === selectedYear
+      )
     : [];
 
-  // Combine all timesheets for the selected member into a single object by day
   const combinedTimesheet = selectedMemberTimesheets.reduce((acc, sheet) => {
     Object.entries(sheet.timesheet).forEach(([day, details]) => {
-      // If the day doesn't exist in the accumulator, add it
       if (!acc[day]) {
         acc[day] = { year: sheet.year, month: sheet.month, ...details };
       }
@@ -48,18 +51,36 @@ export default function Admin() {
     return acc;
   }, {});
 
-  // Calculate total amount based on hours worked and hourly rate
   const totalAmount = Object.values(combinedTimesheet).reduce((total, details) => {
     return total + (details.hours * (selectedMember?.hourlyRate || 0));
   }, 0);
 
+  const handleLogout = () => {
+    navigate('/'); // Navigate to the home route
+  };
+
   return (
     <>
-      <div style={{height:"100vh",width:"100%",backgroundColor:"red",display:"flex",justifyContent:"center",alignItems:"center",boxSizing:"border-box"}}>
-        <div style={{ display: "flex",width:"70%",height:"70%",backgroundColor:"white" }}>
+      <div style={{ height: "100vh", width: "100%", backgroundColor: "#9DB0EC", display: "flex", justifyContent: "center", alignItems: "center", boxSizing: "border-box", position: "relative" }}>
+        
+        {/* Admin Info at the Top Right Corner */}
+        <div style={{}}>
+        {admin && (
+          <div style={{ position: "absolute", top: "10px", right: "20px", textAlign: "right", display: "flex", alignItems: "center", gap: "10px" }}>
+           <img src='.\profileicon.jpg' style={{ height: "30px", width: "30px", borderRadius: "50%" }} alt="Admin Icon"/>
+            <div>
+              <p style={{ margin: "0" }}>{admin.email}</p>
+              <p style={{ margin: "0" }}>{admin.role}</p>
+            </div>
+            {/* Logout Button */}
+            <button onClick={handleLogout} style={{ marginLeft: "10px", padding: "5px 10px", cursor: "pointer" }}>Logout</button>
+          </div>
+        )}
+        </div>
+
+        <div style={{ display: "flex", width: "70%", height: "70%", backgroundColor: "white", borderRadius: "10px" }}>
           
-          {/* Left section for search and member list */}
-          <div style={{ width: "30%", padding: "10px", border: "1px solid black" }}>
+          <div style={{ width: "30%", padding: "10px", border: "1px solid black", borderRadius: "10px" }}>
             <input
               type="text"
               placeholder="Search..."
@@ -76,7 +97,13 @@ export default function Admin() {
                   <li
                     key={index}
                     onClick={() => handleSelectMember(member)}
-                    style={{ padding: "8px 0", borderBottom: "1px solid #eee", cursor: "pointer" }}
+                    style={{
+                      padding: "8px 8px",
+                      borderBottom: "1px solid #eee",
+                      cursor: "pointer",
+                      color: selectedMember?.email === member.email ? 'blue' : 'black',
+                      backgroundColor: selectedMember?.email === member.email ? 'lightblue' : 'transparent'
+                    }}
                   >
                     {member.name}
                   </li>
@@ -87,35 +114,42 @@ export default function Admin() {
             </ul>
           </div>
 
-          {/* Right section for member details and timesheet in table format */}
           <div style={{ width: "70%", padding: "10px" }}>
             {selectedMember ? (
               <div>
                 <h2>Member Details</h2>
 
-                <div style={{display:"flex",justifyContent:"space-between"}}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <h4>{selectedMember.name}</h4>
-                 
                   <h4><strong>Hourly Rate:</strong> :${selectedMember.hourlyRate}</h4>
                   <h4>{selectedMember.email}</h4>
-
                 </div>
-                {/* <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <tbody>
-                    <tr>
-                      <td style={{ padding: '10px', border: '1px solid #ccc' }}><strong>Name:</strong></td>
-                      <td style={{ padding: '10px', border: '1px solid #ccc' }}>{selectedMember.name}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '10px', border: '1px solid #ccc' }}><strong>Email:</strong></td>
-                      <td style={{ padding: '10px', border: '1px solid #ccc' }}>{selectedMember.email}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '10px', border: '1px solid #ccc' }}><strong>Hourly Rate:</strong></td>
-                      <td style={{ padding: '10px', border: '1px solid #ccc' }}>${selectedMember.hourlyRate}</td>
-                    </tr>
-                  </tbody>
-                </table> */}
+
+                {/* Month and Year Dropdowns */}
+                <div style={{ display: 'flex', gap: '10px', margin: '10px 0' }}>
+                  <select 
+                    value={selectedMonth} 
+                    onChange={(e) => setSelectedMonth(parseInt(e.target.value))} 
+                    style={{ padding: '8px', fontSize: '16px' }}
+                  >
+                    {monthNames.map((month, index) => (
+                      <option key={index} value={index + 1}>
+                        {month}
+                      </option>
+                    ))}
+                  </select>
+                  <select 
+                    value={selectedYear} 
+                    onChange={(e) => setSelectedYear(parseInt(e.target.value))} 
+                    style={{ padding: '8px', fontSize: '16px' }}
+                  >
+                    {[2022, 2023, 2024].map(year => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <h3>Timesheet Details</h3>
                 {Object.keys(combinedTimesheet).length > 0 ? (
@@ -135,7 +169,7 @@ export default function Admin() {
                           <tr key={day}>
                             <td style={{ padding: '10px', border: '1px solid #ccc' }}>{details.year}</td>
                             <td style={{ padding: '10px', border: '1px solid #ccc' }}>
-                              {monthNames[details.month - 1]} {/* Convert month number to name */}
+                              {monthNames[details.month - 1]}
                             </td>
                             <td style={{ padding: '10px', border: '1px solid #ccc' }}>{day}</td>
                             <td style={{ padding: '10px', border: '1px solid #ccc' }}>{details.hours}</td>
@@ -145,13 +179,12 @@ export default function Admin() {
                       </tbody>
                     </table>
 
-                    {/* Display Total Amount */}
                     <div style={{ marginTop: '20px', fontSize: '18px' }}>
                       <strong>Total Amount Earned: </strong> ${totalAmount.toFixed(2)}
                     </div>
                   </>
                 ) : (
-                  <p>No timesheet data available for this member.</p>
+                  <p>No timesheet data available for this member for the selected month and year.</p>
                 )}
               </div>
             ) : (

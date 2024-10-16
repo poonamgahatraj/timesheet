@@ -48,13 +48,13 @@ export default function Login() {
                         placeholder='Enter your email'
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        style={{ width: "100%", boxSizing: "border-box", padding: "15px", margin: "10px 0" }}
+                        style={{ width: "100%", boxSizing: "border-box", padding: "15px", margin: "10px 0",border: "1px solid #ccc",outline: "none" }}
                     /><br />
                     <label>Role</label><br />
                     <select
                         value={status}
                         onChange={handleStatusChange}
-                        style={{ width: "100%", boxSizing: "border-box", padding: "15px", margin: "10px 0" }}
+                        style={{ width: "100%", boxSizing: "border-box", padding: "15px", margin: "10px 0",border: "1px solid #ccc",outline: "none" }}
                     >
                         <option value="">Select Role</option>
                         <option value="admin">Admin</option>

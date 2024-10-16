@@ -35,12 +35,13 @@ export default function Admin() {
   };
 
   const selectedMemberTimesheets = selectedMember
-    ? timesheets.filter(sheet => 
-        sheet.email === selectedMember.email &&
-        sheet.month === selectedMonth &&
-        sheet.year === selectedYear
-      )
-    : [];
+  ? timesheets.filter(sheet => 
+      sheet.email === selectedMember.email &&
+      String(sheet.month) === String(selectedMonth) && // Convert month to string for comparison
+      String(sheet.year) === String(selectedYear) // Convert year to string for comparison
+    )
+  : [];
+
 
   const combinedTimesheet = selectedMemberTimesheets.reduce((acc, sheet) => {
     Object.entries(sheet.timesheet).forEach(([day, details]) => {
@@ -80,7 +81,7 @@ export default function Admin() {
 
         <div style={{ display: "flex", width: "70%", height: "70%", backgroundColor: "white", borderRadius: "10px" }}>
           
-          <div style={{ width: "30%", padding: "10px", border: "1px solid black", borderRadius: "10px" }}>
+          <div style={{ width: "30%", padding: "10px", border: "1px solid  #ccc", borderRadius: "10px" }}>
             <input
               type="text"
               placeholder="Search..."

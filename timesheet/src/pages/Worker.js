@@ -86,11 +86,11 @@ export default function Worker() {
 
     return (
         <>
-            <div style={{ padding: "2%" }}>
+            <div style={{ padding: "2%" ,backgroundColor:"#E9D9F5"}}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <img src='./profileicon.jpg' style={{ height: "25px", width: "25px", border: "1px solid black", borderRadius: "50%" }} alt="profile" />
-                        <p>{loggedInUser ? loggedInUser.name : 'Guest'}</p>
+                        <h3>Hii ,{loggedInUser ? loggedInUser.name : 'Guest'}</h3>
                     </div>
                     <button onClick={handleLogout} style={{ padding: '8px 16px', backgroundColor: 'red', color: 'white', border: 'none', borderRadius: '5px' }}>
                         Logout
